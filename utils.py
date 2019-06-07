@@ -2,25 +2,30 @@ import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "client-secret.json"
 
 import dialogflow_v2 as dialogflow
-from weather import Weather, Unit
 
 dialogflow_session_client = dialogflow.SessionsClient()
 PROJECT_ID = "sharat-fyisbx"
 
 from gnewsclient import gnewsclient
 client = gnewsclient.NewsClient(max_results=3)
+from pymongo import MongoClient
+mongocl = MongoClient("mongodb+srv://test777:test777@cluster0-y84qa.mongodb.net/test?retryWrites=true&w=majority")
+db = mongocl.get_database('nagarro')
+records = db.people
 
-def get_news(parameters):
+def get_news(parameters,session_id):
 	# print(parameters)
 	client.topic = parameters.get('news_type')[0]
 	client.language = parameters.get('language')
 	client.location = parameters.get('geo-country')
+	print(client.topic, client.language, client.location)
 	return client.get_news()
 
 import json
 import requests
-def get_weather(parameters):
+def get_weather(parameters,session_id):
 	city = parameters.get('geo-city')
+	print(city)
 	url1 = 'https://www.metaweather.com/api/location/search/?query='+city
 	response = requests.get(url1)
 	data = json.loads(response.content.decode('utf-8'))
@@ -43,8 +48,8 @@ def fetch_reply(msg, session_id):
 	response = detect_intent_from_text(msg, session_id)
 	# print(response)
 	if response.intent.display_name == 'get_news':
-		return get_news(dict(response.parameters))
+		return get_news(dict(response.parameters),session_id)
 	elif response.intent.display_name == 'get_weather':
-		return get_weather(dict(response.parameters))
+		return get_weather(dict(response.parameters),session_id)
 	else:
 		return response.fulfillment_text, "text"

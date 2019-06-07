@@ -1,6 +1,7 @@
 from utils import fetch_reply
 from flask import Flask, request
 from twilio.twiml.messaging_response import Body, Media, Message, MessagingResponse
+import requests
 
 app = Flask(__name__)
 
@@ -12,14 +13,14 @@ def hello():
 def sms_reply():
     """Respond to incoming calls with a simple text message."""
     # Fetch the message
-    print(request.form)
+    # print(request.form)
     msg = request.form.get('Body')
     sender = request.form.get('From')
 
     # Create reply
     resp = MessagingResponse()
     recieved_obj = fetch_reply(msg,sender)
-    print(recieved_obj)
+    # print(recieved_obj)
     
     # If the recieved object is from get_weather()
     if isinstance(recieved_obj[0], str):
@@ -32,7 +33,8 @@ def sms_reply():
     # If the recieved object is from get_news()
     for row in recieved_obj:
         message = Message()
-        message.body("{}\n{}".format(row['title'],row['link']))
+        link = requests.get('http://tinyurl.com/api-create.php?url={}'.format(row['link'])).content.decode('utf-8')
+        message.body("{}\n{}".format(row['title'],link))
         if row['media'] :
             message.media(row['media'])
         resp.append(message)
