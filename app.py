@@ -1,12 +1,12 @@
 from utils import fetch_reply
 from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse
+from twilio.twiml.messaging_response import Body, Media, Message, MessagingResponse
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello, World!"
+    return "Welcome to the chatbot frontpage."
 
 @app.route("/sms", methods=['POST'])
 def sms_reply():
@@ -18,8 +18,24 @@ def sms_reply():
 
     # Create reply
     resp = MessagingResponse()
-    resp.message(fetch_reply(msg,sender))
-    # resp.message("You said: {}".format(msg)).media("https://dictionary.cambridge.org/images/thumb/black_noun_002_03536.jpg")
+    recieved_obj = fetch_reply(msg,sender)
+    print(recieved_obj)
+    
+    # If the recieved object is from get_weather()
+    if isinstance(recieved_obj[0], str):
+        message = Message()
+        message.body(recieved_obj[0])
+        message.media(recieved_obj[1])
+        resp.append(message)
+        return str(resp)
+
+    # If the recieved object is from get_news()
+    for row in recieved_obj:
+        message = Message()
+        message.body("{}\n{}".format(row['title'],row['link']))
+        if row['media'] :
+            message.media(row['media'])
+        resp.append(message)
     return str(resp)
 
 if __name__ == "__main__":
