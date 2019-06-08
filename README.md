@@ -16,4 +16,4 @@ Similarly, First asking 'Sports news from India' and then asking 'Technology new
 
 ### To interact with the bot 
 
-Send a WhatsApp message to +14155238886 with code join wrote-softly.
+Send a WhatsApp message to +14155238886 with code `join wrote-softly`.
